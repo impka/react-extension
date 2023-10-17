@@ -1,8 +1,10 @@
 const oAuth = "vfbeot0djgnfbak436zr61z6vcc9xs";
 const nick = "react";
 const re = /[A-Za-z0-9_]+/g;
-const reResult = location.href.match(re);
-const channel = reResult[reResult.length-1];
+
+let reResult = location.href.match(re);
+let channel = reResult[reResult.length-1];
+let currentMessageUser = "";
 
 const socket = new WebSocket("wss://irc-ws.chat.twitch.tv:443");
 
@@ -12,9 +14,8 @@ socket.addEventListener('open', () => {
     socket.send(`JOIN #${channel}`);
 })
 
-
-let currentMessageUser = "";
 socket.addEventListener('message', event => {
+    //console.log(event.data);
     console.log(event.data);
     /*
     currentMessageUser = event.data.match(/[A-Za-z0-9_]+/)[0];
@@ -23,3 +24,13 @@ socket.addEventListener('message', event => {
     if(event.data.includes("PING")) socket.send("PONG");
 })
 
+chrome.runtime.onMessage.addListener(
+    function(request, sender, sendResponse){
+        if(request.message == "update channel"){
+            socket.send(`PART #${channel}`);
+            reResult = (request.url).match(re);
+            channel = reResult[reResult.length-1];
+            socket.send(`JOIN #${channel}`);
+        }
+    }
+)
