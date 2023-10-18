@@ -9,3 +9,15 @@ chrome.tabs.onUpdated.addListener(
             console.log("sent");
         }
 })
+
+chrome.runtime.onMessage.addListener(
+    function(request, sender, sendResponse){
+        if(request.message == "open youtube link"){
+            console.log(request.url);
+            chrome.tabs.create({
+                active: false,
+                url: request.url,
+            })
+        }
+    }
+)

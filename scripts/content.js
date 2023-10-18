@@ -1,6 +1,7 @@
 const oAuth = "vfbeot0djgnfbak436zr61z6vcc9xs";
 const nick = "react";
 const re = /[A-Za-z0-9_]+/g;
+const youtubeRe = /https:\/\/youtu.be\/.+/;
 
 let reResult = location.href.match(re);
 let channel = reResult[reResult.length-1];
@@ -16,12 +17,23 @@ socket.addEventListener('open', () => {
 
 socket.addEventListener('message', event => {
     //console.log(event.data);
-    console.log(event.data);
-    /*
-    currentMessageUser = event.data.match(/[A-Za-z0-9_]+/)[0];
-    console.log(currentMessageUser);
-    */
-    if(event.data.includes("PING")) socket.send("PONG");
+    if(event.data.includes("PING")){
+        socket.send("PONG");
+    } else {
+        currentMessageUser = event.data.match(/[A-Za-z0-9_]+/)[0];
+        console.log(event.data);
+        if(currentMessageUser == channel){
+            let link;
+            if(event.data.match(youtubeRe)){
+                link = event.data.match(youtubeRe)[0] + ";autoplay=1";
+                console.log(link);
+            }
+            chrome.runtime.sendMessage({
+                message: "open youtube link",
+                url: link,
+            })
+        }
+    }
 })
 
 chrome.runtime.onMessage.addListener(
