@@ -1,5 +1,5 @@
 const oAuth = "vfbeot0djgnfbak436zr61z6vcc9xs";
-const nick = "react";
+const nick = "react-extension";
 const re = /[A-Za-z0-9_]+/g;
 const youtubeRe = /https:\/\/youtu.be\/.+/;
 
