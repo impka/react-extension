@@ -1,4 +1,4 @@
-const oAuth = "vfbeot0djgnfbak436zr61z6vcc9xs";
+const oAuth = (await chrome.storage.local.get(['access_token'])).access_token;
 const nick = "react-extension";
 const re = /[A-Za-z0-9_]+/g;
 const youtubeRe = /https:\/\/youtu.be\/.+/;
@@ -16,7 +16,7 @@ socket.addEventListener('open', () => {
 })
 
 socket.addEventListener('message', event => {
-    //console.log(event.data);
+    console.log(event.data);
     if(event.data.includes("PING")){
         socket.send("PONG");
     } else {

@@ -1,12 +1,19 @@
 
+
 chrome.tabs.onUpdated.addListener(
-    function(tabID, changeInfo, tab){
-        if (changeInfo.url && (changeInfo.url).includes("twitch.tv")){
-            chrome.tabs.sendMessage( tabID, {
+    async function(tabId, changeInfo, tab){
+        if (!changeInfo.url){
+
+        } else if ((changeInfo.url).includes("twitch.tv")){
+            chrome.tabs.sendMessage( tabId, {
                 message: "update channel",
                 url: changeInfo.url,
             });
             console.log("sent");
+        } else if ((changeInfo.url).includes("#access_token")){
+            let token = (changeInfo.url).match(/(?<=access_token=)\w+/)[0];
+            chrome.storage.local.set({access_token: token});
+            chrome.tabs.remove(tabId);
         }
 })
 
