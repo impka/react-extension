@@ -1,4 +1,4 @@
-const oAuth = (await chrome.storage.local.get(['access_token'])).access_token;
+let oAuth = '';
 const nick = "react-extension";
 const re = /[A-Za-z0-9_]+/g;
 const youtubeRe = /https:\/\/youtu.be\/.+/;
@@ -8,6 +8,22 @@ let channel = reResult[reResult.length-1];
 let currentMessageUser = "";
 
 const socket = new WebSocket("wss://irc-ws.chat.twitch.tv:443");
+
+chrome.runtime.sendMessage({ message: 'oAuth token request' }, function (response) {
+      console.log(response);
+      // Do further processing with the response here
+      oAuth = response.access_token;
+    
+  });
+/*
+(async () => {
+    const response = (await chrome.runtime.sendMessage({message: 'oAuth token request'}));
+    console.log(response);
+    // do something with response here, not outside the function
+    oAuth = response;
+})();
+*/
+console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" + oAuth);
 
 socket.addEventListener('open', () => {
     socket.send(`PASS oauth:${oAuth}`);
@@ -37,7 +53,7 @@ socket.addEventListener('message', event => {
 })
 
 chrome.runtime.onMessage.addListener(
-    function(request, sender, sendResponse){
+     function(request, sender, sendResponse){
         if(request.message == "update channel"){
             socket.send(`PART #${channel}`);
             reResult = (request.url).match(re);
