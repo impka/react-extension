@@ -1,3 +1,4 @@
+/* 
 let oAuth = '';
 const nick = "react-extension";
 const re = /[A-Za-z0-9_]+/g;
@@ -15,14 +16,14 @@ chrome.runtime.sendMessage({ message: 'oAuth token request' }, function (respons
       oAuth = response.access_token;
     
   });
-/*
+
 (async () => {
     const response = (await chrome.runtime.sendMessage({message: 'oAuth token request'}));
     console.log(response);
     // do something with response here, not outside the function
     oAuth = response;
 })();
-*/
+
 console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" + oAuth);
 
 socket.addEventListener('open', () => {
@@ -62,3 +63,4 @@ chrome.runtime.onMessage.addListener(
         }
     }
 )
+*/
