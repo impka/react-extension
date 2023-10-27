@@ -5,14 +5,15 @@ const youtubeRe = /https:\/\/youtu.be\/.+/;
 let reResult;
 let channel = null;
 let currentMessageUser = "";
-let oAuth = (await chrome.storage.sync.get(['access_token'])).access_token;
-const socket = new WebSocket("wss://irc-ws.chat.twitch.tv:443");
+let oAuth;
+let socket = new WebSocket("wss://irc-ws.chat.twitch.tv:443");
 
 //Join twitch IRC when web socket is created
-socket.addEventListener('open', () => {
+socket.addEventListener('open', async () => {
+    oAuth = (await chrome.storage.sync.get(['access_token'])).access_token;
     socket.send(`PASS oauth:${oAuth}`);
     socket.send(`NICK ${nick}`);
-    socket.send(`JOIN #${channel}`);
+    //socket.send(`JOIN #${channel}`);
 })
 
 //read IRC messages 
@@ -45,20 +46,18 @@ socket.addEventListener('message', event => {
 
 //On tab creation, check if its a twitch tab, if so, join IRC channel
 chrome.tabs.onCreated.addListener(
-    async function(tabId, changeInfo, tab){
-        if (!changeInfo.url){
-
-        } else if ((changeInfo.url).includes("twitch.tv")){
+    async function(tabId, changeInfo, tab){ 
+         if (changeInfo && (changeInfo.url).includes("twitch.tv")){
             /* old logic to send message to content js to update channel
             chrome.tabs.sendMessage( tabId, {
                 message: "update channel",
-                url: changeInfo.url, // TO DO: CHANGE THIS SHIT SO IT LEAVES WHEN TWITCH TAB CLOSES, JOINS WHEN TWITCH TAB OPENS YOU BIG FAT DUMB FUCK
+                url: changeInfo.url, // TO DO: CHECK onCreated DOCMENTATION AND COMPARE WITH ON UPDATED CUZZ THIS CHANGE INFO SHIT ISNT EXISTING RN
             });
             */
             reResult = changeInfo.url.match(re);
             channel = reResult[reResult.length-1];
             socket.send(`JOIN #${channel}`);
-        } else if ((changeInfo.url).includes("#access_token")){
+        } else if (changeInfo && (changeInfo.url).includes("#access_token")){
             let token = (changeInfo.url).match(/(?<=access_token=)\w+/)[0];
             chrome.storage.sync.set({access_token: token});
             chrome.tabs.remove(tabId);
