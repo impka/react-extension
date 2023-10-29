@@ -1,4 +1,4 @@
-const nick = "react-extension";
+const nick = "react-extension-lol";
 const re = /[A-Za-z0-9_]+/g;
 const youtubeRe = /https:\/\/youtu.be\/.+/;
 
