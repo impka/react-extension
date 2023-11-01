@@ -7,6 +7,7 @@ let currentMessageUser = "";
 let oAuth;
 let socket = new WebSocket("wss://irc-ws.chat.twitch.tv:443");
 let channels = [];
+let ytUrls = [];
 
 //Join twitch IRC when web socket is created
 socket.addEventListener('open', async () => {
@@ -26,14 +27,23 @@ socket.addEventListener('message', event => {
         if(channels.includes(currentMessageUser)){
             let link;
             if(event.data.match(youtubeRe)){
-                link = event.data.match(youtubeRe)[0] + ";autoplay=1";
-                console.log(link);
+                link = event.data.match(youtubeRe)[0];
             }
-            // create new youtube tab with link
-            chrome.tabs.create({
-                active: false,
-                url: link,
-            })
+            console.log(typeof link);
+            console.log(!(ytUrls.includes(link)));
+            console.log(ytUrls);
+            // create new youtube tab with link 
+            if(link && !ytUrls.includes(link) && link.includes("youtu")){
+                chrome.tabs.create(
+                {
+                    active: false,
+                    url: link + ";autoplay=1",
+                }, 
+                function(tab){
+                    console.log(!(ytUrls.includes(link)));
+                    ytUrls[tab.id] = link;
+                }) 
+            }
         }
     }
 })
@@ -46,8 +56,7 @@ chrome.tabs.onUpdated.addListener(
             if(channels[tabId]){
                 socket.send(`PART #${channels[tabId]}`);
             }
-            //change url in urls array and join new
-            //urls[tabId] = changeInfo.url;
+            //change url in urls array and join news
             reResult = changeInfo.url.match(re);
             channels[tabId] = reResult[reResult.length-1];
             socket.send(`JOIN #${channels[tabId]}`);
@@ -66,6 +75,9 @@ chrome.tabs.onRemoved.addListener(
             socket.send(`PART #${channels[tabId]}`);
             channels.splice(tabId, 1);
             console.log(channels);
+        } else if(ytUrls[tabId]){
+            ytUrls.splice(tabId, 1);
+            console.log(ytUrls);
         }
     }
 )
