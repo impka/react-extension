@@ -3,11 +3,10 @@ const re = /[A-Za-z0-9_]+/g;
 const youtubeRe = /https:\/\/youtu.be\/.+/;
 
 let reResult;
-let channel = null;
 let currentMessageUser = "";
 let oAuth;
 let socket = new WebSocket("wss://irc-ws.chat.twitch.tv:443");
-let urls = [];
+let channels = [];
 
 //Join twitch IRC when web socket is created
 socket.addEventListener('open', async () => {
@@ -24,18 +23,13 @@ socket.addEventListener('message', event => {
         socket.send("PONG");
     } else {
         currentMessageUser = event.data.match(/[A-Za-z0-9_]+/)[0];
-        if(currentMessageUser == channel){
+        if(channels.includes(currentMessageUser)){
             let link;
             if(event.data.match(youtubeRe)){
                 link = event.data.match(youtubeRe)[0] + ";autoplay=1";
                 console.log(link);
             }
-            /* old logic to send message to open yt link to content js
-            chrome.runtime.sendMessage({
-                message: "open youtube link",
-                url: link,
-            })
-            */
+            // create new youtube tab with link
             chrome.tabs.create({
                 active: false,
                 url: link,
@@ -48,24 +42,17 @@ socket.addEventListener('message', event => {
 chrome.tabs.onUpdated.addListener(
     function(tabId, changeInfo, tab){ 
          if (changeInfo.url && (changeInfo.url).includes("twitch.tv")){
-            /* old logic to send message to content js to update channel
-            chrome.tabs.sendMessage( tabId, {
-                message: "update channel",
-                url: changeInfo.url, // TO DO: CHECK onCreated DOCMENTATION AND COMPARE WITH ON UPDATED CUZZ THIS CHANGE INFO SHIT ISNT EXISTING RN
-            });
-            */
             //leave old channel if it exists
-            if(urls[tabId]){
-                reResult = (urls[tabId]).match(re);
-                channel = reResult[reResult.length-1];
-                socket.send(`PART #${channel}`);
+            if(channels[tabId]){
+                socket.send(`PART #${channels[tabId]}`);
             }
             //change url in urls array and join new
-            urls[tabId] = changeInfo.url;
+            //urls[tabId] = changeInfo.url;
             reResult = changeInfo.url.match(re);
-            channel = reResult[reResult.length-1];
-            socket.send(`JOIN #${channel}`);
+            channels[tabId] = reResult[reResult.length-1];
+            socket.send(`JOIN #${channels[tabId]}`);
         } else if (changeInfo.url && (changeInfo.url).includes("#access_token")){
+            // if url has access token grab token
             let token = (changeInfo.url).match(/(?<=access_token=)\w+/)[0];
             chrome.storage.sync.set({access_token: token});
             chrome.tabs.remove(tabId);
@@ -75,10 +62,10 @@ chrome.tabs.onUpdated.addListener(
 //On tab removal, check if its a twitch tab, if so, leave IRC channel
 chrome.tabs.onRemoved.addListener(
     function (tabId){
-        if(urls[tabId] && (urls[tabId]).includes("twitch.tv")){
-            reResult = (urls[tabId]).match(re);
-            channel = reResult[reResult.length-1];
-            socket.send(`PART #${channel}`);
+        if(channels[tabId]){
+            socket.send(`PART #${channels[tabId]}`);
+            channels.splice(tabId, 1);
+            console.log(channels);
         }
     }
 )

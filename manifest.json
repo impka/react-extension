@@ -1,25 +1,20 @@
 {
     "manifest_version": 3,
-    "name": "2",
-    "description": "Base Level Extension",
+    "name": "Twitch Reactor",
+    "description": "Automatically opens links posted by streamer in channel",
     "version": "1.0",
     "action": {
       "default_popup": "hello.html",
-      "default_icon": "2b.png"
+      "default_icon": "react.png"
     },
     "background": {
       "service_worker": "scripts/background.js"
     },
-    "content_scripts": [
-      {
-        "js": ["scripts/content.js"],
-        "matches": [
-          "https://www.twitch.tv/*"
-        ]
-      }
-    ],
     "permissions": [
       "tabs",
       "storage"
-    ]
+    ],
+    "icons": {
+      "128": "react.png"
+    }
 }
