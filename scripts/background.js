@@ -6,8 +6,8 @@ let reResult;
 let currentMessageUser = "";
 let oAuth;
 let socket = new WebSocket("wss://irc-ws.chat.twitch.tv:443");
-let channels = [];
-let ytUrls = [];
+let channels = new Map();
+const ytUrls = new Map();
 
 //Join twitch IRC when web socket is created
 socket.addEventListener('open', async () => {
@@ -24,24 +24,24 @@ socket.addEventListener('message', event => {
         socket.send("PONG");
     } else {
         currentMessageUser = event.data.match(/[A-Za-z0-9_]+/)[0];
-        if(channels.includes(currentMessageUser)){
+        if(MapHasItem(channels, currentMessageUser)){
+            console.log("PASSED CHANNEL OWNER CHECK");
             let link;
             if(event.data.match(youtubeRe)){
                 link = event.data.match(youtubeRe)[0];
             }
-            console.log(typeof link);
-            console.log(!(ytUrls.includes(link)));
-            console.log(ytUrls);
             // create new youtube tab with link 
-            if(link && !ytUrls.includes(link) && link.includes("youtu")){
+            console.log(link);
+            if(link && !MapHasItem(ytUrls, link) && link.includes("youtu")){
+                console.log("PASSED YOUTUBE LINK CHECK");
                 chrome.tabs.create(
                 {
                     active: false,
                     url: link + ";autoplay=1",
                 }, 
                 function(tab){
-                    console.log(!(ytUrls.includes(link)));
-                    ytUrls[tab.id] = link;
+                    ytUrls.set(tab.id, link);
+                    console.log(ytUrls.size);
                 }) 
             }
         }
@@ -53,13 +53,14 @@ chrome.tabs.onUpdated.addListener(
     function(tabId, changeInfo, tab){ 
          if (changeInfo.url && (changeInfo.url).includes("twitch.tv")){
             //leave old channel if it exists
-            if(channels[tabId]){
-                socket.send(`PART #${channels[tabId]}`);
+            if(channels.get(tabId)){
+                socket.send(`PART #${channels.get(tabId)}`);
             }
             //change url in urls array and join news
             reResult = changeInfo.url.match(re);
-            channels[tabId] = reResult[reResult.length-1];
-            socket.send(`JOIN #${channels[tabId]}`);
+            channels.set(tabId, reResult[reResult.length-1]);
+            socket.send(`JOIN #${channels.get(tabId)}`);
+            console.log(channels.size);
         } else if (changeInfo.url && (changeInfo.url).includes("#access_token")){
             // if url has access token grab token
             let token = (changeInfo.url).match(/(?<=access_token=)\w+/)[0];
@@ -71,17 +72,27 @@ chrome.tabs.onUpdated.addListener(
 //On tab removal, check if its a twitch tab, if so, leave IRC channel
 chrome.tabs.onRemoved.addListener(
     function (tabId){
-        if(channels[tabId]){
-            socket.send(`PART #${channels[tabId]}`);
-            channels.splice(tabId, 1);
-            console.log(channels);
-        } else if(ytUrls[tabId]){
-            ytUrls.splice(tabId, 1);
-            console.log(ytUrls);
+        if(channels.get(tabId)){
+            socket.send(`PART #${channels.get(tabId)}`);
+            channels.delete(tabId);
+            console.log(channels.size);
+        } else if(ytUrls.get(tabId)){
+            ytUrls.delete(tabId);
+            console.log(ytUrls.size);
         }
     }
 )
 
+function MapHasItem(map, item){
+    for(const element of map){
+        console.log(element);
+        if(element[1] == item){
+            console.log("Match Found");
+            return true;
+        }
+    }
+    return false;
+}
 
 /* OLD LOGIC FOR sending messages between content js and background
 chrome.runtime.onMessage.addListener(
