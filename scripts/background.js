@@ -22,6 +22,7 @@ socket.addEventListener('message', event => {
     console.log(event.data);
     if(event.data.includes("PING")){
         socket.send("PONG");
+        console.log("sent pong")
     } else {
         currentMessageUser = event.data.match(/[A-Za-z0-9_]+/)[0];
         if(MapHasItem(channels, currentMessageUser)){

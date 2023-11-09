@@ -5,7 +5,7 @@
     "version": "1.0",
     "action": {
       "default_popup": "hello.html",
-      "default_icon": "react.png"
+      "default_icon": "xqcKarenTransparent128.png"
     },
     "background": {
       "service_worker": "scripts/background.js"
@@ -15,6 +15,9 @@
       "storage"
     ],
     "icons": {
-      "128": "react.png"
+      "128": "xqcKarenTransparent128.png",
+      "48": "xqcKarenTransparent48.png",
+      "32": "xqcKarenTransparent32.png",
+      "16": "xqcKarenTransparent16.png"
     }
 }
