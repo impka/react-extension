@@ -94,25 +94,3 @@ function MapHasItem(map, item){
     }
     return false;
 }
-
-/* OLD LOGIC FOR sending messages between content js and background
-chrome.runtime.onMessage.addListener(
-    async function(request, sender, sendResponse){
-        if(request.message == "open youtube link"){
-            console.log(request.url);
-            chrome.tabs.create({
-                active: false,
-                url: request.url,
-            })
-        } else if(request.message == 'oAuth token request'){
-            console.log("IM HERE");
-            let token = (await chrome.storage.sync.get(['access_token'])).access_token
-            console.log(token);
-            sendResponse({
-                access_token: token
-            })
-            return true;
-        }
-    }
-)
-*/

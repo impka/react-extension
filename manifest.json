@@ -15,9 +15,9 @@
       "storage"
     ],
     "icons": {
-      "128": "xqcKarenTransparent128.png",
-      "48": "xqcKarenTransparent48.png",
-      "32": "xqcKarenTransparent32.png",
-      "16": "xqcKarenTransparent16.png"
+      "128": "icons/xqcKarenTransparent128.png",
+      "48": "icons/xqcKarenTransparent48.png",
+      "32": "icons/xqcKarenTransparent32.png",
+      "16": "icons/xqcKarenTransparent16.png"
     }
 }
