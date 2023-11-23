@@ -94,3 +94,9 @@ function MapHasItem(map, item){
     }
     return false;
 }
+
+// EXTENSION INSTALL OPEN PAGE STUFF
+
+chrome.runtime.onInstalled.addListener(function(object){
+    chrome.tabs.create({url: chrome.extension.getURL('setup.html')})
+})
